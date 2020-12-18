@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>Footprint</title>
+  <link rel="canonical" href=".">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <style>
+
+* {
+      box-sizing: border-box;
+  }
+.sidenav {
+  height: 100%;
+  width: 250px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: black;
+  overflow-x: hidden;
+  padding-top: 20px;
+  font-family: monospace;
+  color: white;
+}
+.sidenav a {
+  padding: 10px 8px 10px 20px;
+  text-decoration: none;
+  font-size: 20px;
+  color: white;
+  display: block;
+}
+.sidenav a:hover {
+  background-color:#595959;
+} 
+form {
+  margin: 2rem auto 0;
+} 
+#inputForm{
+   padding-left: 250px;
+}
+#inputForm input {
+  display: block;
+  display: inline-block; 
+  font-size: 16px;
+  line-height: 2.0;
+  text-overflow: ellipsis;
+  width: 40%;
+  border-radius: 5px;
+}
+#inputForm input[type="button" i]{
+  font-size: 16px;
+  width: 10%;
+  color: white;
+  padding: 3px;
+  background-color: black;
+  border: none;
+  font-family:monospace;
+} 
+</style> 
+</head>
+<body>
+
+  <div class="sidenav">
+    <p style="padding-left: 20px; font-size: 25px">Footprint >> </p>
+    <br></br>
+    <a href="/">Map Veiw</a>
+    <a href="/circle">How Big Is Your Pie?</a>
+    <a href="/rectangleVeiw">Global Emissions In A Box</a>
+    <a href="rectangleVeiw.html">Global Emissions In A Box</a>
+  </div>
+
+  <center>
+    <br></br>
+      <form id="inputForm">
+        <input type="text" name="countryInput" placeholder="Country">
+        <input type="button" onclick="getResultingCountries()" value="Submit">
+      </form>
+    <br></br>
+  </center>
+
+
+  <script>
+
+  var globalData = "";
+  async function getResultingCountries() {
+    var valsInForm = document.getElementById("inputForm");  
+    var input = valsInForm.elements[0].value; 
+    await fetch(window.location.href + 'query?country=' + input)
+      .then((response) => { 
+          return response.json().then((data) => {
+              globalData = data;
+              return data;
+            }).catch((err) => {
+                console.log(err);
+            }) 
+        });
+
+        document.getElementById("percentOfTot").innerHTML = globalData.pOfTot + ", equivalent to " + globalData.length + " Countries";
+
+        google.charts.load('current', {
+        'packages':['geochart'],
+        'mapsApiKey': 'AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'
+      });
+      google.charts.setOnLoadCallback(drawRegionsMap);
+
+      function drawRegionsMap() {
+      var data = new google.visualization.DataTable();
+      
+      data.addRows(globalData.items.length + 1)
+      data.addColumn('string', 'Country');
+      data.addColumn('number', 'Emissions');
+      for(var i = 0; i < globalData.items.length; i++){
+        data.setValue(i, 0, globalData.items[i].name);
+        data.setValue(i, 1, globalData.items[i].emissions);
+      }
+        data.setValue(globalData.items.length, 0, globalData.input[0].name);
+        data.setValue(globalData.items.length, 1, null);
+
+      var options = {
+        backgroundColor: {
+        fill: '#b0d3f5',
+        },
+        defaultColor: 'red',
+      };
+        var chart = new google.visualization.GeoChart(document.getElementById('regions_div'));
+        chart.draw(data, options);
+      }
+  }
+
+  </script>
+</body>
+
+  <center>
+    <p id="percentOfTot" style = "padding-left: 250px; font-family: monospace; font-size:20px "></p>
+    <p style = "padding-left: 250px; font-family: monospace; font-size:10px "> *Emissions in metric tons</p>
+    <div id="regions_div" style="width: 90%; height: 600px; padding-left: 250px"></div>
+  </center>
+   
+</html>
+
